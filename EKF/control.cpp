@@ -142,6 +142,9 @@ void Ekf::controlExternalVisionFusion()
 			}
 		}
 
+
+		bool ev_valid = true;
+
 		// external vision yaw aiding selection logic
 		if ((_params.fusion_mode & MASK_USE_EVYAW) && !_control_status.flags.ev_yaw && _control_status.flags.tilt_align) {
 			// check for a exernal vision measurement that has fallen behind the fusion time horizon
@@ -154,6 +157,11 @@ void Ekf::controlExternalVisionFusion()
 
 				// get initial yaw from the observation quaternion
 				extVisionSample ev_newest = _ext_vision_buffer.get_newest();
+
+				ev_valid = ev_newest.quat(0) < 1.5;
+
+				if(ev_valid) {
+
 				matrix::Quaternion<float> q_obs(ev_newest.quat(0), ev_newest.quat(1), ev_newest.quat(2), ev_newest.quat(3));
 				matrix::Euler<float> euler_obs(q_obs);
 				euler_init(2) = euler_obs(2);
@@ -193,6 +201,8 @@ void Ekf::controlExternalVisionFusion()
 				_control_status.flags.mag_dec = false;
 
 				ECL_INFO("EKF commencing external vision yaw fusion");
+
+				}
 			}
 		}
 
@@ -219,7 +229,7 @@ void Ekf::controlExternalVisionFusion()
 		}
 
 		// determine if we should use the yaw observation
-		if (_control_status.flags.ev_yaw) {
+		if (_control_status.flags.ev_yaw && ev_valid) {
 			fuseHeading();
 		}
 	}
