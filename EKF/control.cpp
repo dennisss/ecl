@@ -802,39 +802,40 @@ bool Ekf::rangeAidConditionsMet(bool in_range_aid_mode)
 	// 2) our ground speed is not higher than max_vel_for_dual_fusion
 	// 3) Our terrain estimate is stable (needs better checks)
 	if (_params.range_aid) {
-        // check if we should use range finder measurements to estimate height, use hysteresis to avoid rapid switching
-        bool use_range_finder;
-        if (in_range_aid_mode) {
-            use_range_finder = (_terrain_vpos - _state.pos(2) < _params.max_hagl_for_range_aid) && _terrain_initialised;
-        } else {
-            // if we were not using range aid in the previous iteration then require the current height above terrain to be
-            // smaller than 70 % of the maximum allowed ground distance for range aid
-            use_range_finder = (_terrain_vpos - _state.pos(2) < 0.7f * _params.max_hagl_for_range_aid) && _terrain_initialised;
-        }
+		// check if we should use range finder measurements to estimate height, use hysteresis to avoid rapid switching
+		bool use_range_finder;
+		if (in_range_aid_mode) {
+			use_range_finder = (_terrain_vpos - _state.pos(2) < _params.max_hagl_for_range_aid) && _terrain_initialised;
+
+		} else {
+			// if we were not using range aid in the previous iteration then require the current height above terrain to be
+			// smaller than 70 % of the maximum allowed ground distance for range aid
+			use_range_finder = (_terrain_vpos - _state.pos(2) < 0.7f * _params.max_hagl_for_range_aid) && _terrain_initialised;
+		}
 
 		bool horz_vel_valid = (_control_status.flags.gps || _control_status.flags.ev_pos || _control_status.flags.opt_flow)
-				      && (_fault_status.value == 0);
+		                      && (_fault_status.value == 0);
 
 		if (horz_vel_valid) {
 			float ground_vel = sqrtf(_state.vel(0) * _state.vel(0) + _state.vel(1) * _state.vel(1));
 
-            if (in_range_aid_mode) {
-                use_range_finder &= ground_vel < _params.max_vel_for_range_aid;
+			if (in_range_aid_mode) {
+				use_range_finder &= ground_vel < _params.max_vel_for_range_aid;
 
-            } else {
-                // if we were not using range aid in the previous iteration then require the ground velocity to be
-                // smaller than 70 % of the maximum allowed ground velocity for range aid
-                use_range_finder &= ground_vel < 0.7f * _params.max_vel_for_range_aid;
-
-            }
+			} else {
+				// if we were not using range aid in the previous iteration then require the ground velocity to be
+				// smaller than 70 % of the maximum allowed ground velocity for range aid
+				use_range_finder &= ground_vel < 0.7f * _params.max_vel_for_range_aid;
+			}
 
 		} else {
 			use_range_finder = false;
 		}
 
-        use_range_finder &= ((_hagl_innov * _hagl_innov / (sq(_params.range_aid_innov_gate) * _hagl_innov_var)) < 1.0f);
+		use_range_finder &= ((_hagl_innov * _hagl_innov / (sq(_params.range_aid_innov_gate) * _hagl_innov_var)) < 1.0f);
 
 		return use_range_finder;
+
 	} else {
 		return false;
 	}
@@ -910,7 +911,7 @@ void Ekf::controlBetaFusion()
                 fuseSideslip();
  	}
 
- 	
+
 
 }
 
